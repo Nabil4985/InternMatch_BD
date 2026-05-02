@@ -1,0 +1,45 @@
+{% load static %}
+<div class="profile-header-card bg-white border rounded p-4 mb-4">
+    <div class="row align-items-center">
+        <div class="col-auto">
+            {% if profile_type == 'employee' %}
+            <div class="profile-avatar">
+                <div
+                    class="profile-avatar-placeholder bg-primary text-white rounded-circle d-flex align-items-center justify-content-center font-weight-bold">
+                    {{ profile.user.first_name|first }}{{ profile.user.last_name|first }}
+                </div>
+            </div>
+            {% else %}
+            <div class="company-logo-container">
+                {% if profile.company_logo %}
+                <img src="{{ profile.company_logo.url }}" alt="Company Logo"
+                    class="profile-company-logo img-fluid rounded border p-1">
+                {% else %}
+                <div
+                    class="profile-logo-placeholder bg-light border rounded d-flex align-items-center justify-content-center">
+                    <span class="icon-magnet text-primary"></span>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        <div class="col pl-4">
+            <h2 class="display-5 font-weight-bold mb-1">
+                {% if profile_type == 'employee' %}
+                {{ profile.user.get_full_name }}
+                {% else %}
+                {{ profile.user.first_name }} {{ profile.user.last_name }} <small
+                    class="text-muted text-capitalize">(Employer)</small>
+                {% endif %}
+            </h2>
+            <div class="social-links d-flex gap-2">
+                {% if profile_type == 'employee' %}
+                {% if profile.social_linkedin %}<a href="{{ profile.social_linkedin }}" target="_blank"
+                    class="btn btn-outline-primary btn-sm px-3"><i class="fab fa-linkedin mr-1"></i> LinkedIn</a>{% endif %}
+                {% if profile.social_github %}<a href="{{ profile.social_github }}" target="_blank"
+                    class="btn btn-outline-dark btn-sm px-3"><i class="fab fa-github mr-1"></i> GitHub</a>{% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
