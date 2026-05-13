@@ -3,7 +3,7 @@ from django.core.exceptions import PermissionDenied
 from django.urls import reverse_lazy
 
 
-# ── FBV Decorators (kept for backward compatibility) ─────────────────────────
+
 
 def user_is_employer(function):
     def wrap(request, *args, **kwargs):
@@ -21,7 +21,6 @@ def user_is_employee(function):
     return wrap
 
 
-# ── CBV Mixins ────────────────────────────────────────────────────────────────
 
 class EmployerRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
     """Allows access only to authenticated employers."""
