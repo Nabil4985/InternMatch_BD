@@ -8,6 +8,7 @@ from jobapp.views import (
     DeleteBookmarkView,
     DeleteJobView,
     home_view,
+    about_view,
     JobBookmarkView,
     JobEditView,
     JobListView,
@@ -21,6 +22,7 @@ app_name = "jobapp"
 
 urlpatterns = [
     path('', home_view, name='home'),
+    path('about/', about_view, name='about'),
     path('jobs/', JobListView.as_view(), name='job-list'),
     path('job/create/', CreateJobView.as_view(), name='create-job'),
     path('job/<int:id>/', SingleJobView.as_view(), name='single-job'),

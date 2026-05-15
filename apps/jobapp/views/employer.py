@@ -15,7 +15,7 @@ from django.views.generic import (
 from jobapp.forms import JobEditForm, JobForm
 from jobapp.models import Applicant, Skill, Job
 from jobapp.permission import EmployerRequiredMixin
-from jobapp.services import toggle_job_status
+from jobapp.services import toggle_job_status, get_skill_match_count, get_job_required_skills_count
 
 User = get_user_model()
 
@@ -98,7 +98,34 @@ class AllApplicantsView(EmployerRequiredMixin, ListView):
     context_object_name = 'all_applicants'
 
     def get_queryset(self):
-        return Applicant.objects.filter(job_id=self.kwargs['id']).select_related('user', 'job')
+        applicants = Applicant.objects.filter(job_id=self.kwargs['id']).select_related('user', 'job', 'user__employee_profile')
+        # Sort by skill match in Python (after fetching from DB)
+        applicants = list(applicants)
+        applicants.sort(
+            key=lambda a: get_skill_match_count(a.user_id, a.job_id),
+            reverse=True
+        )
+        return applicants
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        job_id = self.kwargs['id']
+        job = get_object_or_404(Job, id=job_id)
+        required_skills_count = get_job_required_skills_count(job_id)
+        
+        # Add skill match info to each applicant
+        for applicant in context['all_applicants']:
+            matched_count = get_skill_match_count(applicant.user_id, job_id)
+            applicant.matched_skills = matched_count
+            applicant.required_skills = required_skills_count
+            if required_skills_count > 0:
+                applicant.match_percentage = round((matched_count / required_skills_count) * 100, 1)
+            else:
+                applicant.match_percentage = 0
+        
+        context['job'] = job
+        context['required_skills_count'] = required_skills_count
+        return context
 
 
 class ApplicantDetailsView(EmployerRequiredMixin, DetailView):
@@ -107,6 +134,28 @@ class ApplicantDetailsView(EmployerRequiredMixin, DetailView):
     template_name = 'jobapp/applicant-details.html'
     context_object_name = 'applicant'
     pk_url_kwarg = 'id'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Get the application record to find the job
+        applicant_id = self.request.GET.get('applicant_id')
+        if applicant_id:
+            applicant_record = get_object_or_404(Applicant, id=applicant_id)
+            context['applicant_record'] = applicant_record
+            context['job'] = applicant_record.job
+            
+            # Add skill matching information
+            matched_count = get_skill_match_count(self.object.id, applicant_record.job_id)
+            required_count = get_job_required_skills_count(applicant_record.job_id)
+            
+            context['matched_skills'] = matched_count
+            context['required_skills'] = required_count
+            if required_count > 0:
+                context['match_percentage'] = round((matched_count / required_count) * 100, 1)
+            else:
+                context['match_percentage'] = 0
+        
+        return context
 
 
 class UpdateApplicantStatusView(EmployerRequiredMixin, View):
