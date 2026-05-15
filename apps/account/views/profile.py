@@ -3,7 +3,7 @@ from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import UpdateView, View, DetailView
 
-from account.forms import EmployeeProfileEditForm, EmployerUserEditForm, EmployeeProfileForm, EmployerProfileForm
+from account.forms import EmployeeProfileEditForm, EmployeeProfileForm, EmployerProfileForm
 from account.models import User, EmployeeProfile, EmployerProfile
 from jobapp.permission import EmployeeRequiredMixin
 
@@ -54,7 +54,7 @@ class EmployerEditProfileView(View):
         if user != request.user or user.role != 'employer':
             return redirect('jobapp:home')
         
-        user_form = EmployerUserEditForm(instance=user)
+        user_form = EmployeeProfileEditForm(instance=user) # Can reuse or create specialized
         profile, created = EmployerProfile.objects.get_or_create(user=user)
         profile_form = EmployerProfileForm(instance=profile)
         
@@ -68,7 +68,7 @@ class EmployerEditProfileView(View):
         if user != request.user or user.role != 'employer':
             return redirect('jobapp:home')
             
-        user_form = EmployerUserEditForm(request.POST, instance=user)
+        user_form = EmployeeProfileEditForm(request.POST, instance=user)
         profile, created = EmployerProfile.objects.get_or_create(user=user)
         profile_form = EmployerProfileForm(request.POST, request.FILES, instance=profile)
         
@@ -76,7 +76,7 @@ class EmployerEditProfileView(View):
             user_form.save()
             profile_form.save()
             messages.success(request, 'Company Profile Was Successfully Updated!')
-            return redirect('account:employer-edit-profile', id=user.id)
+            return redirect('account:edit-profile', id=user.id)
             
         return render(request, self.template_name, {
             'form': user_form,

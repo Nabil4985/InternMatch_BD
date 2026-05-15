@@ -1,11 +1,12 @@
 from django.db import models
 from django.conf import settings
+from taggit.managers import TaggableManager
 
 class EmployeeProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='employee_profile')
     resume = models.FileField(upload_to='resumes/', blank=True, null=True)
     bio = models.TextField(blank=True)
-    skills = models.ManyToManyField('jobapp.Skill', related_name='employee_profiles', blank=True)
+    skills = TaggableManager(blank=True)
 
     def __str__(self):
         return f"Profile for {self.user.email}"

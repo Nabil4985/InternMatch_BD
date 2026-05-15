@@ -8,6 +8,6 @@ from .employer import (
     MakeCompleteJobView,
     UpdateApplicantStatusView,
 )
-from .public import JobListView, SearchResultView, SingleJobView, home_view, about_view
+from .public import JobListView, SearchResultView, SingleJobView, home_view
 from .shared import dashboard_view
 

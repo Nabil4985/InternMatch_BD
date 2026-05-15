@@ -57,18 +57,8 @@ def home_view(request):
     return render(request, 'jobapp/index.html', context)
 
 
-def about_view(request):
-    """
-    About page — static content about InternMatch BD platform.
-    """
-    context = {
-        'page_title': 'About InternMatch BD',
-    }
-    return render(request, 'jobapp/about.html', context)
-
-
 class JobListView(ListView):
-    """All published open jobs, or all jobs if viewing own profile."""
+    """All published open jobs."""
     template_name = 'jobapp/job-list.html'
     context_object_name = 'page_obj'
     paginate_by = 12
@@ -76,10 +66,6 @@ class JobListView(ListView):
     def get_queryset(self):
         user_id = self.request.GET.get('user_id')
         if user_id:
-            # If viewing own jobs (logged in as the job poster), show all jobs
-            if self.request.user.is_authenticated and str(self.request.user.id) == user_id:
-                return Job.objects.prefetch_related('skills').select_related('user').filter(user_id=user_id).order_by('-updated_at')
-            # Otherwise, only show published and open jobs
             return get_listed_jobs().filter(user_id=user_id)
         return get_listed_jobs()
 
